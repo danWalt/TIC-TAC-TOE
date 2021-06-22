@@ -17,9 +17,10 @@ const gameBoard = (() => {
     const botLeft = document.getElementById('6')
     const botMid = document.getElementById('7')
     const botRight = document.getElementById('8')
+    
     const gameArray =[[topLeft, topMid, topRight], [midLeft, center, midRight], [botLeft, botMid, botRight]]
 
-
+    // clear all board cells
     const resetBoard = () => {
         for (let i = 0; i < gameBoard.gameArray.length; i++) {
             for (let j = 0; j < gameBoard.gameArray.length; j++) {
@@ -35,10 +36,13 @@ const gameBoard = (() => {
 
 // only one instance of game. The following includes player creation and gameplay
 const game = (() => {
+
+    // create two players on game start
     const playerX = Player('X')
     const playerO = Player('O')
     let gameOver = false
 
+    // first player is player X
     let currentPlayer = playerX
 
     gameBoard.gameArray.forEach(row  => {
@@ -49,22 +53,21 @@ const game = (() => {
                     if(checkWinner(currentPlayer.getSymbol())){
                         announceWinner()
                     }
-                    currentPlayer = changePlayer()
+                    else{
+                        currentPlayer = changePlayer()
+                        updateMessage(currentPlayer)
+                    }
                 }
             })
         })    
     });
 
-    function getPlayerO(){
-        return playerO
-    }
-
     function getPlayerX(){
         return playerX
     }
 
-    function getCurrentPlayer(){
-        return currentPlayer
+    function updateMessage(player){
+        document.getElementById('message').innerText = `Player ${player.getSymbol()}'s Turn`
     }
 
     function setCurrentPlayer(player) {
@@ -132,76 +135,46 @@ const game = (() => {
         return false
     }
 
-
     // check if left diagonal is a winner
     function checkLeftDiagonal(playerSymbol){
-        let counter = 0;
-        for (let i = 0; i < gameBoard.gameArray.length; i++) {
-            if(counter == 3){
+        if (gameBoard.gameArray[0][0].innerText == playerSymbol &&
+            gameBoard.gameArray[1][1].innerText == playerSymbol &&
+            gameBoard.gameArray[2][2].innerText == playerSymbol) {
                 return true
-            }
-                if (gameBoard.gameArray[i][i].innerText == playerSymbol) {
-                    counter += 1
-                }
-                else {
-                    counter = 0
-                }
-        }
-        if(counter == 3){
-            return true
         }
         return false
     }
 
-
-
-    // TODO: fix right diagonal
     // check if right diagonal is a winner
     function checkRightDiagonal(playerSymbol){
-        let counter = 0;
-        for (let i = 2; i >= 0; i--) {
-            if(counter == 3){
+        if (gameBoard.gameArray[0][2].innerText == playerSymbol &&
+            gameBoard.gameArray[1][1].innerText == playerSymbol &&
+            gameBoard.gameArray[2][0].innerText == playerSymbol) {
                 return true
-            }
-            if (gameBoard.gameArray[i][i].innerText == playerSymbol) {
-                counter += 1
-            }
-            else {
-                counter = 0
-            }
-        }
-        if(counter == 3){
-            return true
         }
         return false
     }
 
     function announceWinner() {
-        console.log('gratz')
+        document.getElementById('message').innerText = `Player ${currentPlayer.getSymbol()} is the winner!`
         gameOver = true
     }
 
-
-    function resetGame(){
-        setCurrentPlayer(getPlayerX())
+    // set player to player X on new game
+    function resetGame(player){
+        updateMessage(player)
+        setCurrentPlayer(player)
     }
 
+    // when gameOver = true, no more moves are allowed
     function setgameOver(value){
         gameOver = value
     }
 
-return {
-    resetGame,
-    setgameOver
-    }    
-
+    // restart game event listener
+    document.getElementById('restart').addEventListener('click', () => {
+        gameBoard.resetBoard()
+        resetGame(getPlayerX())
+        setgameOver(false)
+    })
 })();
-
-
-
-
-document.getElementById('restart').addEventListener('click', () => {
-    gameBoard.resetBoard()
-    game.resetGame()
-    game.setgameOver(false)
-})
