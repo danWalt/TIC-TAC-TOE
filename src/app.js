@@ -36,7 +36,6 @@ const gameBoard = (() => {
 
 // only one instance of game. The following includes player creation and gameplay
 const game = (() => {
-
     // create two players on game start
     const playerX = Player('X')
     const playerO = Player('O')
@@ -45,9 +44,13 @@ const game = (() => {
     // first player is player X
     let currentPlayer = playerX
 
+    let moveCounter = 0
+
     gameBoard.gameArray.forEach(row  => {
+        
         row.forEach(cell => {
             cell.addEventListener('click', () => {
+                moveCounter++               
                 if(cell.innerText === '' && !gameOver){
                     cell.innerText = currentPlayer.getSymbol()
                     if(checkWinner(currentPlayer.getSymbol())){
@@ -55,8 +58,12 @@ const game = (() => {
                     }
                     else{
                         currentPlayer = changePlayer()
-                        updateMessage(currentPlayer)
+                        updateTurnMessage(currentPlayer)
+                        if (moveCounter == 9) {
+                            draw()
+                        }
                     }
+                    
                 }
             })
         })    
@@ -66,8 +73,8 @@ const game = (() => {
         return playerX
     }
 
-    function updateMessage(player){
-        document.getElementById('message').innerText = `Player ${player.getSymbol()}'s Turn`
+    function updateTurnMessage(player){
+        message.updateMessage(`Player ${player.getSymbol()}'s Turn`)
     }
 
     function setCurrentPlayer(player) {
@@ -156,13 +163,14 @@ const game = (() => {
     }
 
     function announceWinner() {
-        document.getElementById('message').innerText = `Player ${currentPlayer.getSymbol()} is the winner!`
+        message.updateMessage(`Player ${currentPlayer.getSymbol()} is the winner!`)
         gameOver = true
     }
 
     // set player to player X on new game
     function resetGame(player){
-        updateMessage(player)
+        moveCounter = 0
+        updateTurnMessage(player)
         setCurrentPlayer(player)
     }
 
@@ -171,10 +179,25 @@ const game = (() => {
         gameOver = value
     }
 
+    function draw(){
+        setgameOver(true)
+        message.updateMessage('Game ended in a draw')
+
+    }
+
     // restart game event listener
     document.getElementById('restart').addEventListener('click', () => {
         gameBoard.resetBoard()
         resetGame(getPlayerX())
         setgameOver(false)
     })
+})();
+
+const message = (() => {
+
+    function updateMessage(message){
+        document.getElementById('message').innerText = message
+    }
+
+    return {updateMessage}
 })();
